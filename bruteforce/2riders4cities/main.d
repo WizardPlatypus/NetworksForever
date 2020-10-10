@@ -24,7 +24,7 @@ enum VISIT_STATUS : bool
     VISITED = true,
     UNVISITED = false
 }
-
+// VISIT_STATUS test
 unittest
 {
     import std.stdio : writeln;
@@ -59,7 +59,7 @@ void setMATRIX()
         }
     }
 }
-
+//setMatrix() test
 unittest
 {
     /** Show Matrix: */
@@ -94,7 +94,7 @@ bool isAllvisited(VISIT_STATUS[] visits)
     }
     return true;
 }
-
+// isAllVisited() test
 unittest
 {
     import std.stdio : writeln;
@@ -112,6 +112,10 @@ unittest
 }
 
 /**
+Counts how many cities are
+*/
+
+/**
 Moves the riders due to nearest arrive, and returns time to make it.
 Works CORRECTLY.
 */
@@ -123,7 +127,7 @@ uint move(ref uint time1, ref uint time2)
 
     return minTime;
 }
-
+// move() test
 unittest
 {
     uint time1 = 3, time2 = 2;
@@ -148,13 +152,49 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[
         visits[target1] = VISIT_STATUS.VISITED;
         visits[target2] = VISIT_STATUS.UNVISITED;
 
+        for (uint i = 0; i < CITYNUMBER; ++i)
+        {
+            if (visits[i] == VISIT_STATUS.UNVISITED)
+            {
+                for (uint j = 0; j < CITYNUMBER; ++j)
+                {
+                    if (i == j)
+                        continue;
+                    if (visits[j] == VISIT_STATUS.UNVISITED)
+                    {
+                        immutable uint tempTime = seeOneWay(i,
+                                MATRIX[target1][i], j, MATRIX[target2][j], visits);
+                        if (tempTime < minTime)
+                            minTime = tempTime;
+                    }
+                }
+            }
+        }
     }
     else if (time1 == 0)
     {
+        visits[target1] = VISIT_STATUS.VISITED;
 
+        for (uint i = 0; i < CITYNUMBER; ++i)
+        {
+            if (visits[i] == VISIT_STATUS.UNVISITED)
+            {
+                immutable uint tempTime = seeOneWay(i, MATRIX[target1][i], target2, time2, visits);
+                if (tempTime < minTime)
+                    minTime = tempTime;
+            }
+        }
     }
     else if (time2 == 0)
     {
+        visits[target2] = VISIT_STATUS.VISITED;
+
+        for (uint i = 0; i < CITYNUMBER; ++i)
+        {
+            immutable uint tempTime = seeOneWay(target1, time1, i, MATRIX[target2], visits);
+            if (tempTime < minTime)
+                minTime = tempTIme;
+        }
     }
 
     return moveTime + minTime;
@@ -163,4 +203,6 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[
 void main()
 {
     setMATRIX();
+    VISIT_STATUS visits = new VISIT_STATUS[CITYNUMBER];
+    visits[0] = VISIT_STATUS.VISITED;
 }
