@@ -1,3 +1,5 @@
+import std.stdio;
+
 /*
 Problem to solve:
 Which strategy 2 riders should follow to visit 4 citites in minimal time?
@@ -17,21 +19,11 @@ uint[CITYNUMBER][CITYNUMBER] MATRIX;
 
 /**
 Enum represents visit status.
-Works CORRECTLY.
 */
 enum VISIT_STATUS : bool
 {
     VISITED = true,
     UNVISITED = false
-}
-// VISIT_STATUS test
-unittest
-{
-    import std.stdio : writeln;
-
-    VISIT_STATUS status = VISIT_STATUS.VISITED;
-    status = VISIT_STATUS.UNVISITED;
-    writeln(status);
 }
 
 /**
@@ -59,27 +51,6 @@ void setMATRIX()
         }
     }
 }
-//setMatrix() test
-unittest
-{
-    /** Show Matrix: */
-    void showMATRIX()
-    {
-        import std.stdio : writef;
-
-        for (uint i = 0; i < CITYNUMBER; ++i)
-        {
-            for (uint j = 0; j < CITYNUMBER; ++j)
-            {
-                writef("%2s ", MATRIX[i][j]);
-            }
-            writef("\n");
-        }
-    }
-
-    setMATRIX();
-    showMATRIX();
-}
 
 /**
 Is all cities visited? It'll return the answer.
@@ -94,26 +65,6 @@ bool isAllvisited(VISIT_STATUS[] visits)
     }
     return true;
 }
-// isAllVisited() test
-unittest
-{
-    import std.stdio : writeln;
-
-    VISIT_STATUS[] visits = [
-        VISIT_STATUS.VISITED, VISIT_STATUS.VISITED, VISIT_STATUS.VISITED
-    ];
-    assert(isAllvisited([
-                VISIT_STATUS.VISITED, VISIT_STATUS.VISITED, VISIT_STATUS.VISITED
-            ]), "Ooops, IT SHOULD WORK!");
-    assert(!isAllvisited([
-                VISIT_STATUS.VISITED, VISIT_STATUS.VISITED, VISIT_STATUS.UNVISITED
-            ]), "Ooops, IT SHOULD WORK!");
-    writeln(isAllvisited(visits));
-}
-
-/**
-Counts how many cities are
-*/
 
 /**
 Moves the riders due to nearest arrive, and returns time to make it.
@@ -136,21 +87,22 @@ unittest
     assert(time1 == 1 && time2 == 0, "PROBLEM WITH SUBTRACTION!");
 }
 
-/**/
+/** 
+Look at one way: moves riders on moveTime, and if threre are unvisited cities — looks for minTime to visit them.
+*/
 uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[] visits)
 {
-    if (isAllvisited(visits))
-    {
-        return 0;
-    }
-
     immutable uint moveTime = move(time1, time2);
-    uint minTime = uint.max;
+    //writef("Move Time: %d;\n", moveTime);
 
+    uint minTime = uint.max;
     if (time1 == 0 && time2 == 0)
     {
+        // writef(" two passes");
         visits[target1] = VISIT_STATUS.VISITED;
         visits[target2] = VISIT_STATUS.UNVISITED;
+        if (isAllvisited(visits))
+            return moveTime;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
         {
@@ -164,6 +116,8 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[
                     {
                         immutable uint tempTime = seeOneWay(i,
                                 MATRIX[target1][i], j, MATRIX[target2][j], visits);
+                        // writefln("%d -> %d : %d", target1, i, MATRIX[target1][i]);
+                        // writefln("%d -> %d : %d", target2, j, MATRIX[target2][j]);
                         if (tempTime < minTime)
                             minTime = tempTime;
                     }
@@ -173,13 +127,17 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[
     }
     else if (time1 == 0)
     {
+        // write(" First; ");
         visits[target1] = VISIT_STATUS.VISITED;
+        if (isAllvisited(visits))
+            return moveTime;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
         {
             if (visits[i] == VISIT_STATUS.UNVISITED)
             {
                 immutable uint tempTime = seeOneWay(i, MATRIX[target1][i], target2, time2, visits);
+                // writefln("%d -> %d : %d", target1, i, MATRIX[target1][i]);
                 if (tempTime < minTime)
                     minTime = tempTime;
             }
@@ -187,22 +145,45 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, VISIT_STATUS[
     }
     else if (time2 == 0)
     {
+        // write(" Second; ");
         visits[target2] = VISIT_STATUS.VISITED;
+        if (isAllvisited(visits))
+            return moveTime;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
         {
-            immutable uint tempTime = seeOneWay(target1, time1, i, MATRIX[target2], visits);
-            if (tempTime < minTime)
-                minTime = tempTIme;
+            if (visits[i] == VISIT_STATUS.UNVISITED)
+            {
+                immutable uint tempTime = seeOneWay(target1, time1, i, MATRIX[target2][i], visits);
+                // writefln("%d -> %d : %d", target2, i, MATRIX[target2][i]);
+
+                if (tempTime < minTime)
+                    minTime = tempTime;
+            }
         }
     }
 
-    return moveTime + minTime;
+    return moveTime;
+}
+/** seeOneWay() test: */
+unittest
+{
+    MATRIX = [
+        [0, 0, 0, 0, 3], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 4],
+        [3, 0, 0, 4, 0]
+    ];
+    VISIT_STATUS[] visits = [
+        VISIT_STATUS.VISITED, VISIT_STATUS.VISITED, VISIT_STATUS.VISITED,
+        VISIT_STATUS.VISITED, VISIT_STATUS.UNVISITED
+    ];
+    immutable uint time = seeOneWay(4, 3, 4, 4, visits);
+
+    writeln(time);
 }
 
 void main()
 {
     setMATRIX();
-    VISIT_STATUS visits = new VISIT_STATUS[CITYNUMBER];
+    VISIT_STATUS[] visits = new VISIT_STATUS[CITYNUMBER];
     visits[0] = VISIT_STATUS.VISITED;
 }
