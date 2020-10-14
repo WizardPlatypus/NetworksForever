@@ -1,6 +1,6 @@
 import std.stdio;
 import citystatus;
-
+import pointintime;
 
 /** Number of cities. The capital is counted. */
 immutable uint CITYNUMBER = 5;
@@ -60,9 +60,19 @@ unittest
 }
 
 /** Look at one way: moves riders on moveTime, and if threre are unvisited cities — looks for minTime to visit them. */
-uint seeOneWay(uint target1, uint time1, uint target2, uint time2, CityStatus[] visits)
+PointInTime seeOneWay(uint target1, uint time1, uint target2, uint time2, CityStatus[] visits)
 {
+    PointInTime basePoint = PointInTime();
+    basePoint.target1 = target1;
+    basePoint.target2 = target2;
+    basePoint.time1 = time1;
+    basePoint.time2 = time2;
+    basePoint.visits = visits.dup;
+
     immutable uint moveTime = move(time1, time2);
+
+    PointInTime quickestWay = PointInTime();
+    quickestWay.theTime = uint.max;
 
     uint minTime = uint.max;
     if (time1 == 0 && time2 == 0)
@@ -70,60 +80,71 @@ uint seeOneWay(uint target1, uint time1, uint target2, uint time2, CityStatus[] 
         visits[target1] = CityStatus.Visited;
         visits[target2] = CityStatus.Visited;
         if (isAllvisited(visits))
-            return moveTime;
+            quickestWay.theTime = 0;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
             if (visits[i] == CityStatus.Unvisited)
             {
                 for (uint j = 0; j < CITYNUMBER; ++j)
-                {
                     if (visits[j] == CityStatus.Unvisited)
                     {
-                        immutable uint tempTime = seeOneWay(i,
+                        auto possibleWay = seeOneWay(i,
                                 MATRIX[target1][i], j, MATRIX[target2][j], visits.dup);
-                        /*writefln("seeOneWay(%s, %s, %s, %s, %s);",
-                            i, MATRIX[target1][i], j, MATRIX[target2][j], visits.dup);*/
-                        // writefln("%d -> %d : %d", target1, i, MATRIX[target1][i]);
-                        // writefln("%d -> %d : %d", target2, j, MATRIX[target2][j]);
-                        if (tempTime < minTime)
-                            minTime = tempTime;
+                        if (possibleWay.theTime < quickestWay.theTime)
+                            quickestWay = possibleWay;
                     }
-                }
             }
     }
     else if (time1 == 0)
     {
         visits[target1] = CityStatus.Visited;
         if (isAllvisited(visits))
-            return moveTime;
+            quickestWay.theTime = 0;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
             if (visits[i] == CityStatus.Unvisited)
             {
-                immutable uint tempTime = seeOneWay(i, MATRIX[target1][i], target2, time2, visits.dup);
-                if (tempTime < minTime)
-                    minTime = tempTime;
+                auto possibleWay = seeOneWay(i, MATRIX[target1][i], target2, time2, visits.dup);
+                if (possibleWay.theTime < quickestWay.theTime)
+                            quickestWay = possibleWay;
             }
     }
     else if (time2 == 0)
     {
         visits[target2] = CityStatus.Visited;
         if (isAllvisited(visits))
-            return moveTime;
+            quickestWay.theTime = 0;
 
         for (uint i = 0; i < CITYNUMBER; ++i)
             if (visits[i] == CityStatus.Unvisited)
             {
-                immutable uint tempTime = seeOneWay(target1, time1, i, MATRIX[target2][i], visits.dup);
-                if (tempTime < minTime)
-                    minTime = tempTime;
+                auto possibleWay =  seeOneWay(target1, time1, i, MATRIX[target2][i], visits.dup);
+                if (possibleWay.theTime < quickestWay.theTime)
+                            quickestWay = possibleWay;
             }
     }
-
-    return moveTime + minTime;
+    basePoint.nextPoint = &quickestWay;
+    basePoint.theTime = moveTime + quickestWay.theTime;
+    return basePoint;
 }
 
-/** seeOneWay() tests: */
+string show(PointInTime point)
+{
+    import std.string : format;
+    string answer = "";
+    uint indent = 0;
+    do
+    {
+        for (uint i = 0; i < indent; ++i)
+            answer ~= "   ";
+        answer ~= format("%d:%d, %d:%d, %s;\n", point.target1, point.time1, point.target2, point.time2, point.visits);
+        point = *point.nextPoint;
+        ++indent;
+    } while (point.nextPoint != null);
+    return answer;
+}
+
+//seeOneWay() tests:
 unittest
 {
     MATRIX = [
@@ -135,10 +156,11 @@ unittest
     ];
     CityStatus[] visits = [ CityStatus.Visited, CityStatus.Visited, CityStatus.Visited,
         CityStatus.Visited, CityStatus.Unvisited ];
-    uint time = seeOneWay(4, 3, 4, 4, visits);
-    //writeln(time);
-    assert(time == 3);
+    PointInTime time = seeOneWay(4, 3, 4, 4, visits);
+    writeln(*time.nextPoint);
+    assert(time.theTime == 3);
 }
+
 unittest
 {
     MATRIX = [
@@ -150,9 +172,9 @@ unittest
     ];
     CityStatus[] visits = [ CityStatus.Visited, CityStatus.Unvisited, CityStatus.Unvisited,
         CityStatus.Unvisited, CityStatus.Unvisited ];
-    uint time = seeOneWay(0, 0, 0, 0, visits);
-    //writeln(time);
-    assert(time == 3);
+    PointInTime time = seeOneWay(0, 0, 0, 0, visits);
+    writeln(*time.nextPoint);
+    assert(time.theTime == 3);
 }
 unittest
 {
@@ -165,9 +187,9 @@ unittest
     ];
     CityStatus[] visits = [ CityStatus.Visited, CityStatus.Unvisited, CityStatus.Unvisited,
         CityStatus.Unvisited, CityStatus.Unvisited ];
-    uint time = seeOneWay(0, 0, 0, 0, visits);
-    writeln(time);
-    assert(time == 5);
+    PointInTime time = seeOneWay(0, 0, 0, 0, visits);
+    writeln(*time.nextPoint);
+    assert(time.theTime == 5);
 }
 unittest
 {
@@ -180,14 +202,11 @@ unittest
     ];
     CityStatus[] visits = [ CityStatus.Visited, CityStatus.Unvisited, CityStatus.Unvisited,
         CityStatus.Unvisited, CityStatus.Unvisited ];
-    uint time = seeOneWay(0, 0, 0, 0, visits);
-    writeln(time);
-    assert(time == 4);
+    PointInTime time = seeOneWay(0, 0, 0, 0, visits);
+    writeln(*time.nextPoint);
+    assert(time.theTime == 4);
 }
 
 void main()
 {
-    setMATRIX();
-    CityStatus[] visits = new CityStatus[CITYNUMBER];
-    visits[0] = CityStatus.Visited;
 }
