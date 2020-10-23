@@ -69,6 +69,22 @@ public
         writeln();
         assert((*time).getTIME == 4);
     }
+    unittest
+    {
+        matrix.MATRIX = [
+            [0, 22, 5, 8, 41],
+            [22, 0, 12, 20, 47],
+            [5, 12, 0, 18, 23],
+            [8, 20, 18, 0, 28],
+            [41, 47, 23, 28, 0]
+        ];
+        CityStatus[] visits = [ CityStatus.Visited, CityStatus.Unvisited, CityStatus.Unvisited,
+            CityStatus.Unvisited, CityStatus.Unvisited ];
+        PointInTime* time = seeOneWay(0, 0, 0, 0, visits);
+        writeln(infoSequence(time));
+        writeln();
+        assert((*time).getTIME == 10);
+    }
 
     // move() test
     unittest
