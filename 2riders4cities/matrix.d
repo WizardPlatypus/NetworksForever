@@ -54,11 +54,29 @@ struct Curve
 // Матриця відстаней
 struct Matrix
 {
+	private:
+
 	// Матриця дуг
 	// matrix[i][j] - дуга з міста i в місто j
 	Curve[citiesNumber][citiesNumber] matrix;
 
-	// конструктор
+	// конструктор за іншою матрицею дуг
+	this(Curve[][] matrix)
+	in
+	{
+		assert(matrix.length == citiesNumber);
+		foreach (row; matrix)
+			assert(row.length == citiesNumber);
+	}
+	do
+	{
+		this.matrix = matrix.dup;
+	}
+
+
+	public:
+
+	// конструктор за матрицею відстаней
 	this(uint[][] matrix)
 	in
 	{
@@ -88,7 +106,7 @@ struct Matrix
 		this.matrix[i][j].markId(id);
 	}
 
-	// 
+	// можливі цілі для руху з вершини from для вершника id
 	uint[] possibleTargets(uint from, uint id)
 	in
 	{
@@ -102,5 +120,11 @@ struct Matrix
 			if (!matrix[from][i].check(id))
 				targets ~= i;
 		return targets;		
+	}
+
+	// повертає копію даного об'єкта
+	Matrix dup()
+	{
+		return Matrix(this.matrix);
 	}
 }
