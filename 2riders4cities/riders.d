@@ -1,6 +1,6 @@
 module rider.d;
 
-import consts : ridersNumber;
+import consts : ridersNumber, citiesNumber;
 
 public:
 
@@ -28,7 +28,12 @@ struct Rider
 }
 
 // переміщує вершників на максивмально можливий для всих час.
-uint move(Rider[ridersNumber] riders)
+uint move(Rider[] riders)
+in
+{
+	assert(riders.length == ridersNumber);
+}
+do
 {
 	uint minTime = uint.max;
 	foreach (rider; riders)
@@ -39,11 +44,39 @@ uint move(Rider[ridersNumber] riders)
 	return minTime;
 }
 
+unittest
+{
+	Rider[] riders = new Rider[ridersNumber];
+	foreach (ref rider; riders)
+		rider = Rider(0, 2);
+	uint time = riders.move();
+
+	assert(time == 2);
+	foreach (rider; riders)
+		assert(rider.time == 0);
+}
+
 // повертає масив цілей вершників.
-uint[] getTargets(Rider[ridersNumber] riders)
+uint[] getTargets(Rider[] riders)
+in
+{
+	assert(riders.length == ridersNumber);
+}
+do
 {
 	uint[] targets = new uint[ridersNumber];
 	for (uint i = 0; i  < ridersNumber; ++i)
 		targets[i] = riders[i].target;
 	return targets;
+}
+
+unittest
+{
+	Rider[] riders = new Rider[ridersNumber];
+	foreach (ref rider; riders)
+		rider = Rider(0, 2);
+	uint[] targets = riders.getTargets();
+
+	assert(targets[0] == 0);
+	assert(targets[1] == 0);
 }

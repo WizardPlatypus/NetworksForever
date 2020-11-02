@@ -1,9 +1,11 @@
 module consts;
 
 public:
+
 enum citiesNumber = 4;
 enum ridersNumber = 2;
 
+private:
 
 unittest
 {

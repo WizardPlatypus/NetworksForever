@@ -1,6 +1,6 @@
 // imports...
 import consts : ridersNumber, citiesNumber;
-import rider : Rider, move, getTargets;
+import riders : Rider, move, getTargets;
 import moment : Moment, connect, Path;
 import matrix : Matrix;
 import distributor : Distributor;

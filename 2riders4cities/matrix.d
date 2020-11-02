@@ -1,5 +1,7 @@
 module matrix;
 
+private:
+
 // константи
 import consts : citiesNumber, ridersNumber;
 
@@ -50,6 +52,8 @@ struct Curve
 		return checks[id];
 	}
 }
+
+public:
 
 // Матриця відстаней
 struct Matrix

@@ -1,8 +1,8 @@
 module moment.d;
 
-public:
-
 import consts : ridersNumber;
+
+public:
 
 // Відображає момент зупинки одного або декількох вершників.
 struct Moment
@@ -29,6 +29,8 @@ struct Moment
 	{
 		this.targets = targets.dup;
 		this.timeLeft = timeLeft;
+		this.prev = null;
+		this.next = [];
 	}
 }
 
