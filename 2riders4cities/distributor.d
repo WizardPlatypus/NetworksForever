@@ -55,7 +55,12 @@ class Distributor
 	public:
 
 	// конструктор
-	this(uint[][] arrays ...)
+	this()
+	{
+		containers = [];
+
+	// додає массив(-и) до розподілювача 
+	void add(uint[][] arrays ...)
 	{
 		containers = [];
 		foreach (array; arrays)
