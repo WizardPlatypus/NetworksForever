@@ -157,6 +157,7 @@ struct Matrix
 			[ 1, 1, 1, 1, 1]
 		]);
 		uint from = 0;
+	}
 
 	// повертає копію даного об'єкта
 	Matrix dup()

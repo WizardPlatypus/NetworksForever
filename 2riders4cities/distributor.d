@@ -41,6 +41,27 @@ struct CyclicContainer
 	}
 }
 
+unittest
+{
+	uint[] origin = [0, 2, 3, 1];
+	auto cc = CyclicContainer(origin);
+	for (uint i = 0; i < origin.length; ++i)
+	{
+		assert(origin[i] == cc.top);
+		cc.move();
+	}
+	// це повинно працювати багато разів.
+	for (uint i = 0; i < origin.length; ++i)
+	{
+		assert(origin[i] == cc.top);
+		cc.move();
+	}
+	for (uint i = 0; i < origin.length; ++i)
+	{
+		assert(origin[i] == cc.top);
+		cc.move();
+	}
+}
 
 public:
 
@@ -58,9 +79,10 @@ class Distributor
 	this()
 	{
 		containers = [];
+	}
 
-	// додає массив(-и) до розподілювача 
-	void add(uint[][] arrays ...)
+	// додає массив до розподілювача 
+	void add(uint[] array)
 	{
 		containers = [];
 		foreach (array; arrays)
@@ -91,3 +113,22 @@ class Distributor
 		retrun m;
 	}
 }	
+
+unittest
+{
+	auto d = Distributor();
+	d.add([0, 2, 4, 3]);
+	d.add([1, 7, 2, 6]);
+	d.add([2, 4]);
+	d.add([0]);
+
+	assert(d.multiplicity == 32);
+
+	assert(d.pop() == [0, 1, 2, 0]);
+	assert(d.pop() == [2, 1, 2, 0]);
+	assert(d.pop() == [4, 1, 2, 0]);
+	assert(d.pop() == [3, 1, 2, 0]);
+	assert(d.pop() == [0, 7, 2, 0]);
+	assert(d.pop() == [2, 7, 2, 0]);
+}
+
