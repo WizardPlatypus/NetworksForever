@@ -80,3 +80,21 @@ unittest
 	assert(targets[0] == 0);
 	assert(targets[1] == 0);
 }
+
+bool areAllVisited(bool[] visits)
+{
+	foreach (visit; visits)
+		if (!visit)
+			return false;
+	return true;
+}
+
+unittest
+{
+	bool[] visits = [true, true, true, true];
+	assert(visits.areAllVisited == true);
+	visits = [false, false, false, false];
+	assert(visits.areAllVisited == false);
+	visits = [true, false, false, false];
+	assert(visits.areAllVisited == false);
+}
