@@ -5,6 +5,8 @@ import moment : Moment, connect, Path;
 import matrix : Matrix;
 import distributor : Distributor;
 
+Path[] theBests;
+
 void func(Rider[] riders, Moment* then, Matrix matrix, bool[] visits)
 in
 {
