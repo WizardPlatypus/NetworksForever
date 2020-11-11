@@ -1,3 +1,4 @@
+// UNTITTESTS PASSED
 module consts;
 
 public:
