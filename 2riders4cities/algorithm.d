@@ -1,39 +1,128 @@
-// imports...
+module algorithm;
+
+private:
+
 import consts : ridersNumber, citiesNumber;
-import riders : Rider, move, getTargets;
-import moment : Moment, connect, Path;
-import matrix : Matrix;
+import moment.d : Moment, connect;
 import distributor : Distributor;
+import matrix : Matrix;
+import riders : Rider, move, getHalts, allDone;
 
-void func(Rider[] riders, Moment* then, Matrix matrix)
+
+public:
+
+/** Starts algorithm **/
+void start(uint[citiesNumber][citiesNumber] adjency_matrix, uint origin)
+in
 {
-	Moment* now = new Moment(getTargets(riders), move(riders));
-	connect(then, now);
+	assert(origin < citiesNumber);
+}
+do
+{
+	// TODO
+	return;
+}
 
-	for (uint i = 0; i < ridersNumber; ++i)
-		if (riders[i].time == 0)
-			matrix.visit((*then).targets[i], (*now).targets[i], i);
-	
+/** New step for riders **/
+void step(Moment* then, Matrix matrix, Rider[] riders, bool[] visits)
+{
+	Moment* now = new Moment(riders.getHalts(), riders.move());
+
 	auto d = Distributor();
-	uint[] freeToGo = new uint[];
-	for (uint i = 0; i < ridersNumber; ++i)
-		if (riders[i].time == 0)
-		{
-			d.add(matrix.possibleTargets(riders[i].target, i));
-			freeToGo ~= i;
-		}
-	
-	for (uint i = 0; i < d.multiplicity; ++i)
+	Rider*[] free;
+	foreach (i, ref rider; riders)
 	{
-		auto newTargets = d.pop();
-		for (uint j = 0; j < freeToGO.length; ++j)
-			riders[freeToGo[j]].target = newTargets[j];
-
-		func(riders.dup, now, matrix.dup);
+		if (rider.time == 0)
+		{
+			visits[rider.halt] = true;
+			auto possibilities = matrix.possibleTargets(rider.halt, i);
+			if (possibilities.length != 0)
+			{
+				d.add(possibilities);
+				free ~= &rider;
+			}
+		}
+	}
+	if (visits.allDone)
+	{
+		destroy(riders);
+		destroy(visits);
+		destroy(matrix);
+		return;
+	}
+	else if (free.length == 0)
+	{
+		destroy(matrix);
+		destroy(riders);
+		destroy(visits);
+		return;
 	}
 
+	for (uint i = 0; i < d.multiplicity; ++i)
+	{
+		auto combination = d.pop();
+		for (uint j = 0; j < combination.length; ++j)
+		{
+			free[i].time = matrix.time(free[i].halt, combination[i]);
+			free[i].halt = combination[i];
+		}
+		step(now, matrix.dup, riders.dup, visits.dup);
+	}
 
-}
-void main()
+	destroy(matrix);
+	destroy(riders);
+	destroy(visits);
+	return;
+}	
+/*
+/** Path /
+class Path
 {
-}
+public:
+	/** Sequence of cities' indexes from which this path is made of *
+	uint[][ridersNumber] halts;
+	/** How much time do this path takes to end itself *
+	uint time;
+
+	this(uint time)
+	{
+		time = 0;
+	}
+
+	/** Adds a new pair of halts *
+	void add(uint[ridersNumber] newHalts)
+	{
+		for (uint i = 0; i < ridersNumber; ++i)
+			this.halts[i] ~= newHalts[i];
+		return;
+	}
+
+	/** Increases time **
+	void increaseTime(uint incTime)
+	{
+		this.time += incTime;
+	}
+
+	/** Converts to string **
+	string info()
+	{
+		string result = "";
+		foreach (riderPath; path)
+		{
+			result ~= riderPath.toString() ~ '\n';
+		}
+		result ~= '\t' ~ time.toString();
+		return result;
+	}
+
+	/** GC **
+	~this()
+	{
+		destroy(halts);
+	}
+
+	Path dup()
+	{
+
+	}
+}*/

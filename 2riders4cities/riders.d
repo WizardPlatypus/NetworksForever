@@ -4,30 +4,25 @@ import consts : ridersNumber, citiesNumber;
 
 public:
 
-// Вершник.
+/** Rider **/
 struct Rider
 {
-	public:
-
-	// ціль
-	uint target;
-	// час до цілі
+public:
+	uint halt;
 	uint time;
 	
-	// конструктор
-	this(uint target, uint time)
+	this(uint halt, uint time)
 	in
 	{
 		assert(target < citiesNumber);
 	}
 	do
 	{
-		this.target = target;
+		this.halt = halt;
 		this.time = time;
 	}
 }
 
-// переміщує вершників на максивмально можливий для всих час.
 uint move(Rider[] riders)
 in
 {
@@ -37,46 +32,31 @@ do
 {
 	uint minTime = uint.max;
 	foreach (rider; riders)
-		if (minTime > rider.time)
+		if (minTime > rider.time && rider.time != 0)
 			minTime = rider.time;
 	foreach (ref rider; riders)
-		rider.time -= minTime;
+		if (rider.time != 0)
+			rider.time -= minTime;
 	return minTime;
 }
 
-unittest
-{
-	Rider[] riders = new Rider[ridersNumber];
-	foreach (ref rider; riders)
-		rider = Rider(0, 2);
-	uint time = riders.move();
-
-	assert(time == 2);
-	foreach (rider; riders)
-		assert(rider.time == 0);
-}
-
-// повертає масив цілей вершників.
-uint[] getTargets(Rider[] riders)
+uint[] getHalts(Rider[] riders)
 in
 {
 	assert(riders.length == ridersNumber);
 }
 do
 {
-	uint[] targets = new uint[ridersNumber];
+	uint[] halts = new uint[ridersNumber];
 	for (uint i = 0; i  < ridersNumber; ++i)
-		targets[i] = riders[i].target;
-	return targets;
+		targets[i] = riders[i].halt;
+	return halts;
 }
 
-unittest
+bool allDone(bool[] visits)
 {
-	Rider[] riders = new Rider[ridersNumber];
-	foreach (ref rider; riders)
-		rider = Rider(0, 2);
-	uint[] targets = riders.getTargets();
-
-	assert(targets[0] == 0);
-	assert(targets[1] == 0);
+	foreach (visit; visits)
+		if (!visit)
+			return false;
+	return true;
 }

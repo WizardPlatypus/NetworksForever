@@ -2,23 +2,16 @@ module matrix;
 
 private:
 
-// константи
 import consts : citiesNumber, ridersNumber;
 
-// дуга між двома містами
 struct Curve
 {
-	private:
-
-	// массив відвідувань цієї дуги вершниками 
+private:
 	bool[ridersNumber] checks;
 
-	public:
-
-	// час, який необхідно витратити щоб пройти цю дугу
+public:
 	uint time;
 
-	// конструктор
 	this(uint time)
 	{
 		this.time = time;
@@ -26,7 +19,6 @@ struct Curve
 		checks[] = false;
 	}
 
-	// відмічає вершника за індексом id
 	void mark(uint id)
 	in
 	{
@@ -37,7 +29,6 @@ struct Curve
 		this.checks[id] = true;
 	}
 
-	// повертає стан вершника за id 
 	bool check(uint id)
 	in
 	{
@@ -62,16 +53,11 @@ struct Curve
 
 public:
 
-// Матриця відстаней
 struct Matrix
 {
-	private:
+private:
+	Curve[][] matrix;
 
-	// Матриця дуг
-	// matrix[i][j] - дуга з міста i в місто j
-	Curve[citiesNumber][citiesNumber] matrix;
-
-	// конструктор за іншою матрицею дуг
 	this(Curve[][] matrix)
 	in
 	{
@@ -84,26 +70,30 @@ struct Matrix
 		this.matrix = matrix.dup;
 	}
 
-	public:
-
-	// конструктор за матрицею відстаней
-	this(uint[][] matrix)
+	bool check(uint from, uint to, uint id)
 	in
 	{
-		assert(matrix.length == citiesNumber)
-		
-		for (uint i = 0; i < matrix.length; ++i)
-			assert(matrix[i].length == citiesNumber);
+		assert(from < citiesNumber);
+		assert(to < citiesNumber);
+		assert(id < ridersNumber);
 	}
 	do
 	{
-		this.matrix = new Curve[citiesNumber][citiesNumber];
-		for (uint i = 0; i < citiesNumber; ++i)
-			for (uint j = 0; j < citiesNumber; ++j)
-				this.matrix[i][j] = Curve(matrix[i][j]);
+		return matrix[from][to].check(id);
 	}
 
-	// відмітити дугу з i в j як пройдену вершником з індексом id
+public:
+	this(uint[][] matrix)
+	{
+		this.matrix.length = citiesNumber;
+		for (uint i = 0; i < citiesNumber; ++i)
+		{
+			this.matrix[i].length = citiesNumber;
+			for (uint j = 0; j < citiesNumber; ++j)
+				this.matrix[i][j] = Curve(matrix[i][j]);
+		}
+	}
+
 	void visit(uint i, uint j, uint id)
 	in
 	{
@@ -129,9 +119,9 @@ struct Matrix
 		uint j = 0;
 		uint id = 0;
 		m.visit(i, j, id);
-		assert(m[i][j].check(id));
+		assert(m.check(i, j, id));
+	}
 
-	// можливі цілі для руху з вершини from для вершника id
 	uint[] possibleTargets(uint from, uint id)
 	in
 	{
@@ -140,7 +130,7 @@ struct Matrix
 	}
 	do
 	{
-		uint[] targets = new uint[];
+		uint[] targets;
 		for (uint i = 0; i < ridersNumber; ++i)
 			if (!matrix[from][i].check(id))
 				targets ~= i;
@@ -150,16 +140,32 @@ struct Matrix
 	unittest
 	{
 		auto m = Matrix([
-			[ 1, 1, 1, 1, 1],
-			[ 1, 1, 1, 1, 1],
-			[ 1, 1, 1, 1, 1],
-			[ 1, 1, 1, 1, 1],
-			[ 1, 1, 1, 1, 1]
+			[ 0, 1, 1, 1, 1],
+			[ 1, 0, 1, 1, 1],
+			[ 1, 1, 0, 1, 1],
+			[ 1, 1, 1, 0, 1],
+			[ 1, 1, 1, 1, 0]
 		]);
-		uint from = 0;
+		uint origin = 0;
+		import std.stdio :writeln;
+		writeln(m.possibleTargets(origin, 0));
+		assert(m.possibleTargets(origin, 0) == [0, 1, 2, 3, 4]);
+		m.visit(0, 0, 0);
+		writeln(m.possibleTargets(origin, 0));
+		assert(m.possibleTargets(origin, 0) == [1, 2, 3, 4]);
 	}
 
-	// повертає копію даного об'єкта
+	uint time(uint from, uint to)
+	in
+	{
+		assert(from < citiesNumber);
+		assert(to < citiesNumber);
+	}
+	do
+	{
+		return matrix[from][to].time;
+	}
+
 	Matrix dup()
 	{
 		return Matrix(this.matrix);

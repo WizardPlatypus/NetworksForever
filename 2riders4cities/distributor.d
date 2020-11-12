@@ -2,31 +2,24 @@ module distributor;
 
 private:
 
-// Циклічний контейнер.
 struct CyclicContainer
 {
 	private:
-	// масив значень, які необхідно передати.
 	uint[] array;
-	// індекс поточного елементу. 
 	uint index;
 
 	public:
-	// конструктор.
 	this(uint[] array)
 	{
 		this.array = array.dup;
 		this.index = 0;
 	}
 
-	// повертає поточний елемент масиву. 
 	@property uint top()
 	{
 		return array[index];
 	}
 
-	// переходить до наступного елементу та повертає true, якщо повернувся
-	// до першого елементу.
 	bool move()
 	{
 		++index;
@@ -34,68 +27,50 @@ struct CyclicContainer
 		return index == 0;
 	}
 
-	// довжина массиву.
 	@property uint length()
 	{
 		return array.length;
 	}
-}
 
-unittest
-{
-	uint[] origin = [0, 2, 3, 1];
-	auto cc = CyclicContainer(origin);
-	for (uint i = 0; i < origin.length; ++i)
+	unittest
 	{
-		assert(origin[i] == cc.top);
-		cc.move();
-	}
-	// це повинно працювати багато разів.
-	for (uint i = 0; i < origin.length; ++i)
-	{
-		assert(origin[i] == cc.top);
-		cc.move();
-	}
-	for (uint i = 0; i < origin.length; ++i)
-	{
-		assert(origin[i] == cc.top);
-		cc.move();
+		uint[] origin = [ 0, 2, 5, 4 ];
+		CyclicContainer cc = CyclicContainer(origin);
+		for (uint i = 0; i < origin.length; ++i)
+		{
+			assert(origin[i] == cc.top);
+			cc.move();
+		}
+		
+		for (uint i = 0; i < origin.length; ++i)
+		{
+			assert(origin[i] == cc.top);
+			cc.move();
+		}
 	}
 }
 
 public:
 
-// класс, що розподіляє елементи массивів на послідовності.
-class Distributor
+struct Distributor
 {
-	private:
-
-	// контейнери
+private:
 	CyclicContainer[] containers;
 
-	public:
+public:
 
-	// конструктор
-	this()
+	void add(uint[][] arrays ...)
 	{
-		containers = [];
-	}
-
-	// додає массив до розподілювача 
-	void add(uint[] array)
-	{
-		containers = [];
 		foreach (array; arrays)
 			containers ~= CyclicContainer(array);
 	}
 
-	// повертає поточну послідовність та переходить до наступної
 	uint[] pop()
 	{
 		uint[] array = new uint[containers.length];
 
 		bool flag = true;
-		foreach (i, container; containers)
+		foreach (i, ref container; containers)
 		{
 			array[i] = container.top;
 			if (flag)
@@ -104,31 +79,30 @@ class Distributor
 		return array;
 	}		
 
-	// кількість послідовностей, які можливо згенерувати.
 	@property uint multiplicity()
 	{
 		uint m = 1;
 		foreach (container; containers)
 			m *= container.length;
-		retrun m;
+		return m;
 	}
 }	
 
 unittest
 {
-	auto d = Distributor();
-	d.add([0, 2, 4, 3]);
-	d.add([1, 7, 2, 6]);
-	d.add([2, 4]);
-	d.add([0]);
+	auto d = new Distributor();
+	d.add([0, 1, 2, 3]);
+	d.add([4, 5, 6]);
+	d.add([7]);
+	d.add([8, 9, 10, 11, 12]);
 
-	assert(d.multiplicity == 32);
+	assert(d.multiplicity == 60);
 
-	assert(d.pop() == [0, 1, 2, 0]);
-	assert(d.pop() == [2, 1, 2, 0]);
-	assert(d.pop() == [4, 1, 2, 0]);
-	assert(d.pop() == [3, 1, 2, 0]);
-	assert(d.pop() == [0, 7, 2, 0]);
-	assert(d.pop() == [2, 7, 2, 0]);
+	assert(d.pop() == [0, 4, 7, 8]);
+	assert(d.pop() == [1, 4, 7, 8]);
+	d.pop();
+	d.pop();
+	assert(d.pop() == [0, 5, 7, 8]);
+	assert(d.pop() == [1, 5, 7, 8]);
 }
 
