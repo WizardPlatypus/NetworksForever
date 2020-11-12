@@ -3,30 +3,45 @@ module algorithm;
 private:
 
 import consts : ridersNumber, citiesNumber;
-import moment.d : Moment, connect;
+import moment : Moment, connect;
 import distributor : Distributor;
 import matrix : Matrix;
 import riders : Rider, move, getHalts, allDone;
+
+import std.stdio;
 
 
 public:
 
 /** Starts algorithm **/
-void start(uint[citiesNumber][citiesNumber] adjency_matrix, uint origin)
+void start(uint[][] adjency_matrix, uint origin)
 in
 {
 	assert(origin < citiesNumber);
 }
 do
 {
-	// TODO
-	return;
+	Matrix matrix = Matrix(adjency_matrix);
+	Rider[] riders;
+	riders.length = ridersNumber;
+	foreach (ref rider; riders)
+	{
+		rider.halt = origin;
+		rider.time = 0;
+	}
+	bool[] visits;
+	visits.length = citiesNumber;
+	visits[] = false;
+	visits[origin] = true;
+
+	step(null, matrix, riders, visits);
 }
 
 /** New step for riders **/
 void step(Moment* then, Matrix matrix, Rider[] riders, bool[] visits)
 {
 	Moment* now = new Moment(riders.getHalts(), riders.move());
+	writeln(riders.getHalts());
 
 	auto d = Distributor();
 	Rider*[] free;

@@ -1,4 +1,4 @@
-module rider.d;
+module riders;
 
 import consts : ridersNumber, citiesNumber;
 
@@ -14,7 +14,7 @@ public:
 	this(uint halt, uint time)
 	in
 	{
-		assert(target < citiesNumber);
+		assert(halt < citiesNumber);
 	}
 	do
 	{
@@ -37,7 +37,7 @@ do
 	foreach (ref rider; riders)
 		if (rider.time != 0)
 			rider.time -= minTime;
-	return minTime;
+	return minTime == uint.max ? 0 : minTime;
 }
 
 uint[] getHalts(Rider[] riders)
@@ -49,42 +49,57 @@ do
 {
 	uint[] halts = new uint[ridersNumber];
 	for (uint i = 0; i  < ridersNumber; ++i)
-		targets[i] = riders[i].halt;
+		halts[i] = riders[i].halt;
 	return halts;
 }
 
 bool allDone(bool[] visits)
 {
-<<<<<<< HEAD
-=======
-	Rider[] riders = new Rider[ridersNumber];
-	foreach (ref rider; riders)
-		rider = Rider(0, 2);
-	uint[] targets = riders.getTargets();
-
-	assert(targets[0] == 0);
-	assert(targets[1] == 0);
-}
-
-bool areAllVisited(bool[] visits)
-{
->>>>>>> 4e3462d0075bb5d88c7a14789eaab177fe9e199c
 	foreach (visit; visits)
 		if (!visit)
 			return false;
 	return true;
-<<<<<<< HEAD
-}
-=======
 }
 
-unittest
+unittest 
 {
-	bool[] visits = [true, true, true, true];
-	assert(visits.areAllVisited == true);
-	visits = [false, false, false, false];
-	assert(visits.areAllVisited == false);
-	visits = [true, false, false, false];
-	assert(visits.areAllVisited == false);
+	// allDone : PASSED
+	{
+		bool[] array = [true, true, true, false];
+		assert(array.allDone() == false);
+		array = [true, true, true, true];
+		assert(array.allDone() == true);
+	}
+	// getHalts : PASSED
+	{
+		Rider[] riders;
+		riders.length = ridersNumber;
+		for (uint i = 0; i < ridersNumber; ++i)
+			riders[i] = Rider(i, 0);
+		uint[] result;
+		result.length = ridersNumber;
+		for (uint i = 0; i < ridersNumber; ++i)
+			result[i] = i;
+		uint[] answer = riders.getHalts();
+		for (uint i = 0; i < ridersNumber; ++i)
+			assert(answer[i] == result[i]);
+	}
+	// move with 0 : PASSED
+	{
+		Rider[] riders;
+		riders.length = ridersNumber;
+		for (uint i = 0; i < ridersNumber; ++i)
+			riders[i] = Rider(i, 0);
+		auto answer = riders.move();
+		assert(answer == 0);
+	}
+	// move general : PASSED
+	{
+		Rider[] riders;
+		riders.length = ridersNumber;
+		for (uint i = 0; i < ridersNumber; ++i)
+			riders[i] = Rider(i, i + 1);
+		for (uint i = 0; i < ridersNumber; ++i)
+			assert(riders.move() == 1);
+	}
 }
->>>>>>> 4e3462d0075bb5d88c7a14789eaab177fe9e199c
