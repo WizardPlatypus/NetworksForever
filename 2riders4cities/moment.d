@@ -17,6 +17,7 @@ public:
     /** Possible next moment **/
     Moment[] next;
 
+    /** Constructor **/
     this(uint[ridersNumber] halts, uint time)
     {
         this.halts = halts.dup;
@@ -25,37 +26,37 @@ public:
         this.next = [];
     }
 
+    /** connects child (next) to the parent (this) **/
     void connect(Moment next)
     {
         this.next ~= next;
-        next != null ? next.prev = this;
+        if (next !is null)
+            next.prev = this;
     }
 }
 
 unittest
 {
-    // Moment : 
+    uint[ridersNumber] halts;
+    // Moment : PASSED 
     {
-        uint[ridersNumber] halts;
         for (uint i = 0; i < ridersNumber; ++i)
             halts[i] = i;
         Moment now = new Moment(halts, 0);
         assert(now.halts[0] == 0);
         assert(now.halts[1] == 1);
-        assert(now.time == 0);
+        assert(now.passed == 0);
     }
-    // connect general : 
+    // connect general : PASSED
     {
-        uint[ridersNumber] halts;
-
         halts[] = 2;
-        now = new Moment(halts, 1);
+        Moment now = new Moment(halts, 1);
 
         halts[] = 1;
-        then = new Moment(halts, 8);
+        Moment then = new Moment(halts, 8);
 
         then.connect(now);
-        assert(now.prev == then);
         assert(then.next[0] == now);
+        assert(now.prev == then);
     }
 }
