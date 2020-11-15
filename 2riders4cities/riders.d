@@ -1,6 +1,8 @@
 module riders;
 
-import consts : ridersNumber, citiesNumber;
+private:
+
+import consts;
 
 public:
 
@@ -8,14 +10,13 @@ public:
 struct Rider
 {
 public:
+	/** Where is rider going to or where is he now **/
 	uint halt;
+	/** How much time rider need to arrive at halt **/
 	uint time;
 	
 	this(uint halt, uint time)
-	in
-	{
-		assert(halt < citiesNumber);
-	}
+	in { assert(halt < citiesNumber); }
 	do
 	{
 		this.halt = halt;
@@ -23,12 +24,7 @@ public:
 	}
 }
 
-uint move(Rider[] riders)
-in
-{
-	assert(riders.length == ridersNumber);
-}
-do
+uint move(Rider[ridersNumber] riders)
 {
 	uint minTime = uint.max;
 	foreach (rider; riders)
@@ -40,20 +36,15 @@ do
 	return minTime == uint.max ? 0 : minTime;
 }
 
-uint[] getHalts(Rider[] riders)
-in
+uint[ridersNumber] getHalts(Rider[ridersNumber] riders)
 {
-	assert(riders.length == ridersNumber);
-}
-do
-{
-	uint[] halts = new uint[ridersNumber];
-	for (uint i = 0; i  < ridersNumber; ++i)
+	uint[ridersNumber] halts;
+	for (uint i = 0; i < ridersNumber; ++i)
 		halts[i] = riders[i].halt;
 	return halts;
 }
 
-bool allDone(bool[] visits)
+bool allDone(bool[ridersNumber] visits)
 {
 	foreach (visit; visits)
 		if (!visit)
@@ -63,43 +54,41 @@ bool allDone(bool[] visits)
 
 unittest 
 {
-	// allDone : PASSED
+	// allDone : 
 	{
-		bool[] array = [true, true, true, false];
+		bool[ridersNumber] array;
+		array[] = false;
 		assert(array.allDone() == false);
-		array = [true, true, true, true];
+		array[$ - 1] = true;
+		assert(array.allDone() == false);
+		array[] = true;
 		assert(array.allDone() == true);
 	}
-	// getHalts : PASSED
+
+	Rider[ridersNumber] riders;
+	for (uint i = 0; i < ridersNumber; ++i)
+		riders[i] = Rider(i, 0);
+	// getHalts : 
 	{
-		Rider[] riders;
-		riders.length = ridersNumber;
-		for (uint i = 0; i < ridersNumber; ++i)
-			riders[i] = Rider(i, 0);
-		uint[] result;
-		result.length = ridersNumber;
+		uint[ridersNumber] result;
 		for (uint i = 0; i < ridersNumber; ++i)
 			result[i] = i;
-		uint[] answer = riders.getHalts();
+		auto answer = riders.getHalts();
 		for (uint i = 0; i < ridersNumber; ++i)
 			assert(answer[i] == result[i]);
 	}
-	// move with 0 : PASSED
+	// move with 0 : 
 	{
-		Rider[] riders;
-		riders.length = ridersNumber;
-		for (uint i = 0; i < ridersNumber; ++i)
-			riders[i] = Rider(i, 0);
 		auto answer = riders.move();
 		assert(answer == 0);
 	}
-	// move general : PASSED
+	// move general : 
 	{
-		Rider[] riders;
-		riders.length = ridersNumber;
 		for (uint i = 0; i < ridersNumber; ++i)
 			riders[i] = Rider(i, i + 1);
+		// difference between each rider's time == 1, so
 		for (uint i = 0; i < ridersNumber; ++i)
 			assert(riders.move() == 1);
 	}
 }
+

@@ -1,45 +1,35 @@
 module main;
 
-import consts : ridersNumber, citiesNumber;
-import algorithm : start;
+import consts;
+import algorithm;
+import std.stdio; 
 
-void set(uint[][] matrix)
-in
+uint[citiesNumber][citiesNumber] getArray(string source)
 {
-	assert(matrix.length == citiesNumber);
-	foreach (row; matrix)
-		assert(row.length == citiesNumber);
-}
-do
-{
-	import std.random : uniform;
+	File file = File(source);
+	uint[citiesNumber][citiesNumber] array;
 	for (uint i = 0; i < citiesNumber; ++i)
+	{
 		for (uint j = 0; j < citiesNumber; ++j)
-			matrix[i][j] = uniform(0, 15);
+		{
+			file.readf(" %d", array[i][j]);
+		}
+	}
+	return array;
 }
 
-/**
-  That's a main function.
-  Here we only use our algorithm, which is hidden in module algorithm.d
-**/
 void main()
 {
-	import std.stdio;
-
-	uint[][] matrix; // kinda adjency matrix
-	matrix.length = citiesNumber;
-	for (uint i = 0; i < citiesNumber; ++i)
-		matrix[i].length = citiesNumber;
-	matrix.set(); // you can set matrix in any way you want
-
-	uint origin = 0; // where everyone begins
+	uint[citiesNumber][citiesNumber] array = getArray("input.txt"); // kinda matrix
+	uint origin = 0; // where everyone starts
 	
-	start(matrix, origin); // it's the most important : we start the algorithm
+	start(array, origin); // start 
+
+	writeln(array);
 
 	writeln("At least that line should work ... ");
 	writeln("At least that line should work ... and it works!!! ");
 
 	return;
-
 }
 

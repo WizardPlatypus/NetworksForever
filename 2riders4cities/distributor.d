@@ -4,11 +4,10 @@ private:
 
 struct CyclicContainer
 {
-	private:
+private:
 	uint[] array;
 	uint index;
-
-	public:
+public:
 	this(uint[] array)
 	{
 		this.array = array.dup;
@@ -56,9 +55,7 @@ struct Distributor
 {
 private:
 	CyclicContainer[] containers;
-
 public:
-
 	void add(uint[][] arrays ...)
 	{
 		foreach (array; arrays)
