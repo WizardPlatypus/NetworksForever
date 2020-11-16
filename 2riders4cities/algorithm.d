@@ -8,14 +8,15 @@ import distributor;
 import curves;
 import riders;
 
-import std.stdio;
+debug import std.stdio;
 
 /** New step for riders **/
 void step(Moment then, Curve[citiesNumber][citiesNumber] matrix,
     Rider[ridersNumber] riders, bool[citiesNumber] visits)
 {
+    debug { writef("Entering")}
     Moment now = new Moment(riders.getHalts(), riders.move());
-
+    debug { writef("halts: %d\n", riders.getHalts()); }
     auto d = Distributor();
     uint[] free;
     foreach (i, rider; riders)
@@ -40,6 +41,7 @@ void step(Moment then, Curve[citiesNumber][citiesNumber] matrix,
         return;
     }
 
+    auto backup = riders;
     for (uint i = 0; i < d.multiplicity; ++i)
     {
         auto combination = d.pop();
@@ -51,6 +53,7 @@ void step(Moment then, Curve[citiesNumber][citiesNumber] matrix,
             riders[id] = Rider(newHalt, matrix[oldHalt][newHalt].price);
         }
         step(now, matrix, riders, visits);
+        riders = backup;
     }
 
     return;
@@ -63,6 +66,7 @@ void start(uint[citiesNumber][citiesNumber] array, uint origin)
 in { assert(origin < citiesNumber); }
 do
 {
+    debug { writeln("Enter algo.start func"); }
     Curve[citiesNumber][citiesNumber] matrix;
     matrix.fill(array);
     
@@ -73,5 +77,6 @@ do
     bool[citiesNumber] visits;
     visits[origin] = true;
 
+    debug { writeln("First step:"); }
     step(null, matrix, riders, visits);
 }

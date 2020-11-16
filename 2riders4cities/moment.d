@@ -1,5 +1,7 @@
 module moment;
 
+private:
+
 import consts : ridersNumber;
 
 public:

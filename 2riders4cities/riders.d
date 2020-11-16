@@ -44,7 +44,7 @@ uint[ridersNumber] getHalts(Rider[ridersNumber] riders)
 	return halts;
 }
 
-bool allDone(bool[ridersNumber] visits)
+bool allDone(bool[citiesNumber] visits)
 {
 	foreach (visit; visits)
 		if (!visit)
@@ -91,4 +91,3 @@ unittest
 			assert(riders.move() == 1);
 	}
 }
-

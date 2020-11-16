@@ -22,9 +22,11 @@ void main()
 {
 	uint[citiesNumber][citiesNumber] array = getArray("input.txt"); // kinda matrix
 	uint origin = 0; // where everyone starts
-	
-	start(array, origin); // start 
 
+	debug { writeln("Starting algorithm ..."); }
+	start(array, origin); // start 
+	debug { writeln("Ending algorithm ..."); }
+	
 	writeln(array);
 
 	writeln("At least that line should work ... ");
